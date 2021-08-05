@@ -2,12 +2,12 @@ import firebase from "firebase/app"
 import "firebase/auth"
 import "firebase/firestore"
 import React, { useEffect, useState } from "react"
-import { Button, Fab, Menu, MenuItem, Switch, TextField, Tooltip } from "@material-ui/core"
+import { Button, Fab, LinearProgress, Menu, MenuItem, Switch, TextField, Tooltip } from "@material-ui/core"
 import { createTheme, ThemeProvider } from "@material-ui/core/styles"
-import AddBoxIcon from '@material-ui/icons/AddBox';
-import DeleteIcon from '@material-ui/icons/Delete';
-import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
-import RestoreFromTrashIcon from '@material-ui/icons/RestoreFromTrash';
+import AddBoxIcon from "@material-ui/icons/AddBox"
+import DeleteIcon from "@material-ui/icons/Delete"
+import DeleteForeverIcon from "@material-ui/icons/DeleteForever"
+import RestoreFromTrashIcon from "@material-ui/icons/RestoreFromTrash"
 import dayjs from "dayjs"
 import styles from "./styles.module.css"
 
@@ -42,7 +42,7 @@ const signIn = async () => {
 }
 
 const updateRecord = async (record: IRecordDiary) => {
-  const entry : IEntryDiary = {
+  const entry: IEntryDiary = {
     date: record.date,
     text: record.text,
     trash: record.trash,
@@ -126,6 +126,7 @@ export const Home = (): JSX.Element => {
 
   return (
     <ThemeProvider theme={theme}>
+      {loading ? <LinearProgress /> : <LinearProgress variant="determinate" value={100} />}
       {userUid && (
         <Button
           aria-controls="simple-menu"
@@ -180,7 +181,7 @@ export const Home = (): JSX.Element => {
         aria-label="add"
         onClick={async () => {
           const diaryEntry: IEntryDiary = {
-            date: new Date().toISOString(),
+            date: dayjs().toISOString(),
             text: "",
             trash: false,
           }
@@ -204,24 +205,38 @@ export const Home = (): JSX.Element => {
               InputLabelProps={{
                 shrink: true,
               }}
+              onChange={async (e) => {
+                await updateRecord({
+                  ...record,
+                  date: dayjs(e.target.value).toISOString(),
+                })
+              }}
             />
           </form>
           <Tooltip arrow title="Trash">
-            <Button onClick={async () => {
-              await updateRecord({
-                ...record,
-                trash: true,
-              })
-            }}><DeleteIcon/> </Button>
+            <Button
+              onClick={async () => {
+                await updateRecord({
+                  ...record,
+                  trash: true,
+                })
+              }}
+            >
+              <DeleteIcon />{" "}
+            </Button>
           </Tooltip>
           <Tooltip arrow title="Delete">
-            <Button><DeleteForeverIcon/> </Button>
+            <Button>
+              <DeleteForeverIcon />{" "}
+            </Button>
           </Tooltip>
           <Tooltip arrow title="Restore">
-            <Button><RestoreFromTrashIcon></RestoreFromTrashIcon> </Button>
+            <Button>
+              <RestoreFromTrashIcon></RestoreFromTrashIcon>{" "}
+            </Button>
           </Tooltip>
           <TextField
-            label={record.date}
+            label={dayjs(record.date).format("YYYY-MM-DD")}
             multiline
             rows={4}
             defaultValue={record.text}
@@ -232,7 +247,7 @@ export const Home = (): JSX.Element => {
 
               await updateRecord({
                 ...record,
-                text: e.target.value
+                text: e.target.value,
               })
             }}
           />
