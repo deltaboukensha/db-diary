@@ -51,7 +51,16 @@ npm i -D eslint-config-next
 ```
 npm i -D firebase-tools
 npm i -g firebase-tools
+npm i firebase
+npm i @types/firebase
 ```
+
+# REDUX
+
+npm i redux
+npm i @types/redux
+npm i react-redux
+npm i @types/react-redux
 
 # COMMANDS
 
