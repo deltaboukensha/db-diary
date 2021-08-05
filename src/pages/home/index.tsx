@@ -2,7 +2,7 @@ import firebase from "firebase/app"
 import "firebase/auth"
 import "firebase/firestore"
 import React, { useEffect, useState } from "react"
-import { Button, TextField } from "@material-ui/core"
+import { Button, Switch, TextField } from "@material-ui/core"
 import { createTheme, ThemeProvider } from "@material-ui/core/styles"
 import styles from "./styles.module.css"
 
@@ -36,6 +36,36 @@ export const Home = (): JSX.Element => {
   const [displayName, setDisplayName] = useState<string>(null)
   const [email, setEmail] = useState<string>(null)
   const [diaryList, setDiaryList] = useState<IRecordDiary[]>([])
+  const [showTrash, setShowTrash] = useState<boolean>(false)
+
+  const loadData = async () => {
+    setLoading(true)
+
+    firebase
+        .app()
+        .firestore()
+        .collection("user")
+        .doc(await firebase.app().auth().currentUser.uid)
+        .collection("diary")
+        .where("trash", "!=", !showTrash)
+        .orderBy("trash")
+        .orderBy("date", "desc")
+        .onSnapshot(async (snapshot) => {
+          const list: IRecordDiary[] = []
+          for (const d of snapshot.docs) {
+            const data = (await d.data()) as IEntryDiary
+            const record: IRecordDiary = {
+              id: d.id,
+              text: data.text,
+              date: data.date,
+              trash: data.trash,
+            }
+            list.push(record)
+          }
+          setDiaryList(list)
+          setLoading(false)
+        })
+  }
 
   useEffect(() => {
     if (firebase.apps.length != 0) return
@@ -63,30 +93,7 @@ export const Home = (): JSX.Element => {
         return
       }
 
-      firebase
-        .app()
-        .firestore()
-        .collection("user")
-        .doc(await firebase.app().auth().currentUser.uid)
-        .collection("diary")
-        .where("trash", "!=", true)
-        .orderBy("trash")
-        .orderBy("date", "desc")
-        .onSnapshot(async (snapshot) => {
-          const list: IRecordDiary[] = []
-          for (const d of snapshot.docs) {
-            const data = (await d.data()) as IEntryDiary
-            const record: IRecordDiary = {
-              id: d.id,
-              text: data.text,
-              date: data.date,
-              trash: data.trash,
-            }
-            list.push(record)
-          }
-          setDiaryList(list)
-          setLoading(false)
-        })
+      await loadData()
     })
   }, [])
 
@@ -169,6 +176,24 @@ export const Home = (): JSX.Element => {
             defaultValue={i.text}
             variant="outlined"
             className={styles["record-text"]}
+            onBlur={async (e) => {
+              if(e.target.value == i.text) return
+              
+              const entry : IEntryDiary = {
+                text: e.target.value,
+                date: i.date,
+                trash: i.trash,
+              }
+              console.log(entry)
+              await firebase
+                .app()
+                .firestore()
+                .collection("user")
+                .doc(await firebase.app().auth().currentUser.uid)
+                .collection("diary")
+                .doc(i.id)
+                .set(entry)
+            }}
           />
         </div>
       ))}
