@@ -1,4 +1,6 @@
-import firebase from "firebase"
+import firebase from "firebase/app"
+import "firebase/auth"
+import "firebase/firestore"
 import React, { useEffect, useState } from "react"
 import { Button, TextField } from "@material-ui/core"
 import { createTheme, ThemeProvider } from "@material-ui/core/styles"
