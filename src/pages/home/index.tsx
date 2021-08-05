@@ -2,8 +2,9 @@ import firebase from "firebase/app"
 import "firebase/auth"
 import "firebase/firestore"
 import React, { useEffect, useState } from "react"
-import { Button, Switch, TextField } from "@material-ui/core"
+import { Button, Fab, Menu, MenuItem, Switch, TextField } from "@material-ui/core"
 import { createTheme, ThemeProvider } from "@material-ui/core/styles"
+import { Add } from "@material-ui/icons"
 import styles from "./styles.module.css"
 
 const theme = createTheme({
@@ -32,39 +33,45 @@ interface IRecordDiary {
 
 export const Home = (): JSX.Element => {
   const [loading, setLoading] = useState<boolean>(false)
-  const [count, setCount] = useState<number>(0)
   const [displayName, setDisplayName] = useState<string>(null)
-  const [email, setEmail] = useState<string>(null)
+  const [userUid, setUserUid] = useState<string>(null)
   const [diaryList, setDiaryList] = useState<IRecordDiary[]>([])
   const [showTrash, setShowTrash] = useState<boolean>(false)
+  const [anchorEl, setAnchorEl] = useState(null)
+
+  const signIn = async () => {
+    const googleAuthProvider = new firebase.auth.GoogleAuthProvider()
+    await firebase.app().auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+    await firebase.app().auth().signInWithRedirect(googleAuthProvider)
+  }
 
   const loadData = async () => {
     setLoading(true)
 
     firebase
-        .app()
-        .firestore()
-        .collection("user")
-        .doc(await firebase.app().auth().currentUser.uid)
-        .collection("diary")
-        .where("trash", "!=", !showTrash)
-        .orderBy("trash")
-        .orderBy("date", "desc")
-        .onSnapshot(async (snapshot) => {
-          const list: IRecordDiary[] = []
-          for (const d of snapshot.docs) {
-            const data = (await d.data()) as IEntryDiary
-            const record: IRecordDiary = {
-              id: d.id,
-              text: data.text,
-              date: data.date,
-              trash: data.trash,
-            }
-            list.push(record)
+      .app()
+      .firestore()
+      .collection("user")
+      .doc(await firebase.app().auth().currentUser.uid)
+      .collection("diary")
+      .where("trash", "!=", !showTrash)
+      .orderBy("trash")
+      .orderBy("date", "desc")
+      .onSnapshot(async (snapshot) => {
+        const list: IRecordDiary[] = []
+        for (const d of snapshot.docs) {
+          const data = (await d.data()) as IEntryDiary
+          const record: IRecordDiary = {
+            id: d.id,
+            text: data.text,
+            date: data.date,
+            trash: data.trash,
           }
-          setDiaryList(list)
-          setLoading(false)
-        })
+          list.push(record)
+        }
+        setDiaryList(list)
+        setLoading(false)
+      })
   }
 
   useEffect(() => {
@@ -84,7 +91,7 @@ export const Home = (): JSX.Element => {
 
     firebase.auth().onAuthStateChanged(async (user) => {
       setDisplayName(user?.displayName)
-      setEmail(user?.email)
+      setUserUid(user?.uid)
       setLoading(false)
 
       if (!user) {
@@ -99,56 +106,58 @@ export const Home = (): JSX.Element => {
 
   return (
     <ThemeProvider theme={theme}>
-      <h1>Home</h1>
-      <Button style={{ backgroundColor: "#12824C", color: "#FFFFFF" }} variant="outlined">
-        Default
-      </Button>
-      <Button variant="outlined" color="primary">
-        Primary
-      </Button>
-      <Button variant="outlined" color="secondary">
-        Secondary
-      </Button>
-      <Button variant="outlined" disabled>
-        Disabled
-      </Button>
-      <Button variant="outlined" color="primary" href="#outlined-buttons">
-        Link
-      </Button>
-      <span>{loading ? "loading" : "done"}</span>
-      <span>
-        {displayName}
-        {email}
-      </span>
-      <Button variant="outlined" onClick={() => setCount(count + 1)}>
-        Button {count}
-      </Button>
-
-      <Button
-        variant="outlined"
-        color="primary"
-        onClick={async () => {
-          const googleAuthProvider = new firebase.auth.GoogleAuthProvider()
-          await firebase.app().auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-          await firebase.app().auth().signInWithRedirect(googleAuthProvider)
+      {userUid && (
+        <Button
+          aria-controls="simple-menu"
+          aria-haspopup="true"
+          onClick={(e) => {
+            setAnchorEl(e.currentTarget)
+          }}
+        >
+          {displayName}
+        </Button>
+      )}
+      {loading && !userUid && <Button>Loading</Button>}
+      {!loading && !userUid && (
+        <Button
+          aria-controls="simple-menu"
+          aria-haspopup="true"
+          onClick={async () => {
+            await signIn()
+          }}
+        >
+          Sign In
+        </Button>
+      )}
+      <Menu
+        id="simple-menu"
+        anchorEl={anchorEl}
+        keepMounted
+        open={Boolean(anchorEl)}
+        onClose={() => {
+          setAnchorEl(null)
         }}
       >
-        SignIn
-      </Button>
-
-      <Button
-        variant="outlined"
-        color="secondary"
-        onClick={async () => {
-          await firebase.app().auth().signOut()
-        }}
-      >
-        SignOut
-      </Button>
-
-      <Button
-        variant="outlined"
+        <MenuItem
+          onClick={async (e) => {
+            setAnchorEl(null)
+            await signIn()
+          }}
+        >
+          Change User
+        </MenuItem>
+        <MenuItem
+          onClick={async (e) => {
+            setAnchorEl(null)
+            await firebase.app().auth().signOut()
+          }}
+        >
+          Sign Out
+        </MenuItem>
+      </Menu>
+      <Fab
         color="primary"
+        aria-label="add"
         onClick={async () => {
           const diaryEntry: IEntryDiary = {
             date: new Date().toISOString(),
@@ -164,11 +173,13 @@ export const Home = (): JSX.Element => {
             .add(diaryEntry)
         }}
       >
-        Create
-      </Button>
-
+        <Add />
+      </Fab>
       {diaryList.map((i) => (
         <div key={i.id} className={styles["record"]}>
+          <Button>Trash</Button>
+          <Button>Delete</Button>
+          <Button>Undo</Button>
           <TextField
             label={i.date}
             multiline
@@ -177,14 +188,13 @@ export const Home = (): JSX.Element => {
             variant="outlined"
             className={styles["record-text"]}
             onBlur={async (e) => {
-              if(e.target.value == i.text) return
-              
-              const entry : IEntryDiary = {
+              if (e.target.value == i.text) return
+
+              const entry: IEntryDiary = {
                 text: e.target.value,
                 date: i.date,
                 trash: i.trash,
               }
-              console.log(entry)
               await firebase
                 .app()
                 .firestore()
