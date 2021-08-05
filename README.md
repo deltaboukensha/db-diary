@@ -57,16 +57,17 @@ npm i @types/firebase
 
 # REDUX
 
+```
 npm i redux
 npm i @types/redux
 npm i react-redux
 npm i @types/react-redux
+```
 
-# COMMANDS
+# MATERIAL UI
 
 ```
-firebase login
-firebase init
-firebase deploy
-firebase deploy --only hosting
+npm i @material-ui/core
+npm i @material-ui/icons
+
 ```

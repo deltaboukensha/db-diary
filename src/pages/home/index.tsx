@@ -1,5 +1,20 @@
 import firebase from "firebase"
 import { useEffect, useState } from "react"
+import { Button } from "@material-ui/core"
+import { createTheme, ThemeProvider } from "@material-ui/core/styles"
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      // Purple and green play nicely together.
+      main: "#11cb5f",
+    },
+    secondary: {
+      // This is green.A700 as hex.
+      main: "#11cb5f",
+    },
+  },
+})
 
 interface IEntryDiary {
   date: string
@@ -70,16 +85,35 @@ export const Home = (): JSX.Element => {
   }, [])
 
   return (
-    <>
+    <ThemeProvider theme={theme}>
       <h1>Home</h1>
+      <Button style={{ backgroundColor: "#12824C", color: "#FFFFFF" }} variant="outlined">
+        Default
+      </Button>
+      <Button variant="outlined" color="primary">
+        Primary
+      </Button>
+      <Button variant="outlined" color="secondary">
+        Secondary
+      </Button>
+      <Button variant="outlined" disabled>
+        Disabled
+      </Button>
+      <Button variant="outlined" color="primary" href="#outlined-buttons">
+        Link
+      </Button>
       <span>{loading ? "loading" : "done"}</span>
       <span>
         {displayName}
         {email}
       </span>
-      <button onClick={() => setCount(count + 1)}>Button {count}</button>
+      <Button variant="outlined" onClick={() => setCount(count + 1)}>
+        Button {count}
+      </Button>
 
-      <button
+      <Button
+        variant="outlined"
+        color="primary"
         onClick={async () => {
           const googleAuthProvider = new firebase.auth.GoogleAuthProvider()
           await firebase.app().auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
@@ -87,17 +121,21 @@ export const Home = (): JSX.Element => {
         }}
       >
         SignIn
-      </button>
+      </Button>
 
-      <button
+      <Button
+        variant="outlined"
+        color="secondary"
         onClick={async () => {
           await firebase.app().auth().signOut()
         }}
       >
         SignOut
-      </button>
+      </Button>
 
-      <button
+      <Button
+        variant="outlined"
+        color="primary"
         onClick={async () => {
           const diaryEntry: IEntryDiary = {
             date: new Date().toISOString(),
@@ -113,12 +151,12 @@ export const Home = (): JSX.Element => {
         }}
       >
         Create
-      </button>
+      </Button>
 
       {diaryList.map((i) => (
         <p key={i.id}>{i.date + " " + i.text}</p>
       ))}
-    </>
+    </ThemeProvider>
   )
 }
 export default Home
