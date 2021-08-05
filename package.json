@@ -6,7 +6,10 @@
   "scripts": {
     "test": "jest .",
     "lint": "eslint .",
-    "format": "prettier . --write"
+    "format": "prettier . --write",
+    "build": "next build",
+    "dev": "next dev",
+    "start": "next start"
   },
   "repository": {
     "type": "git",
@@ -18,15 +21,22 @@
     "url": "https://github.com/deltaboukensha/db-diary/issues"
   },
   "homepage": "https://github.com/deltaboukensha/db-diary#readme",
-  "dependencies": {},
+  "dependencies": {
+    "@types/next": "^9.0.0",
+    "@types/react": "^17.0.15",
+    "@types/react-dom": "^17.0.9",
+    "next": "^11.0.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
+  },
   "devDependencies": {
     "@types/jest": "^26.0.24",
     "@types/node": "^16.4.7",
     "@typescript-eslint/eslint-plugin": "^4.28.5",
     "@typescript-eslint/parser": "^4.28.5",
     "eslint": "^7.31.0",
+    "eslint-config-next": "^11.0.1",
     "jest": "^27.0.6",
-    "next": "^11.0.1",
     "prettier": "^2.3.2",
     "ts-jest": "^27.0.4",
     "ts-loader": "^9.2.4",
