@@ -1,16 +1,15 @@
 import firebase from "firebase"
-import { useEffect, useState } from "react"
-import { Button } from "@material-ui/core"
+import React, { useEffect, useState } from "react"
+import { Button, TextField } from "@material-ui/core"
 import { createTheme, ThemeProvider } from "@material-ui/core/styles"
+import styles from "./styles.module.css"
 
 const theme = createTheme({
   palette: {
     primary: {
-      // Purple and green play nicely together.
-      main: "#11cb5f",
+      main: "#9370DB",
     },
     secondary: {
-      // This is green.A700 as hex.
       main: "#11cb5f",
     },
   },
@@ -19,12 +18,14 @@ const theme = createTheme({
 interface IEntryDiary {
   date: string
   text: string
+  trash: boolean
 }
 
 interface IRecordDiary {
   id: string
   date: string
   text: string
+  trash: boolean
 }
 
 export const Home = (): JSX.Element => {
@@ -66,8 +67,10 @@ export const Home = (): JSX.Element => {
         .collection("user")
         .doc(await firebase.app().auth().currentUser.uid)
         .collection("diary")
+        .where("trash", "!=", true)
+        .orderBy("trash")
+        .orderBy("date", "desc")
         .onSnapshot(async (snapshot) => {
-          console.log({ snapshot })
           const list: IRecordDiary[] = []
           for (const d of snapshot.docs) {
             const data = (await d.data()) as IEntryDiary
@@ -75,6 +78,7 @@ export const Home = (): JSX.Element => {
               id: d.id,
               text: data.text,
               date: data.date,
+              trash: data.trash,
             }
             list.push(record)
           }
@@ -139,7 +143,8 @@ export const Home = (): JSX.Element => {
         onClick={async () => {
           const diaryEntry: IEntryDiary = {
             date: new Date().toISOString(),
-            text: "hello world",
+            text: "",
+            trash: false,
           }
           await firebase
             .app()
@@ -154,7 +159,16 @@ export const Home = (): JSX.Element => {
       </Button>
 
       {diaryList.map((i) => (
-        <p key={i.id}>{i.date + " " + i.text}</p>
+        <div key={i.id} className={styles["record"]}>
+          <TextField
+            label={i.date}
+            multiline
+            rows={4}
+            defaultValue={i.text}
+            variant="outlined"
+            className={styles["record-text"]}
+          />
+        </div>
       ))}
     </ThemeProvider>
   )
