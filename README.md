@@ -47,13 +47,17 @@ npm i -D eslint-config-next
 ```
 
 # FIREBASE
+
 ```
+npm i -D firebase-tools
 npm i -g firebase-tools
 ```
 
 # COMMANDS
+
 ```
 firebase login
 firebase init
 firebase deploy
+firebase deploy --only hosting
 ```
