@@ -10,7 +10,7 @@
     "build": "next build",
     "dev": "next dev",
     "start": "next start",
-    "export": "next export -o .out",
+    "export": "next export -o .public",
     "deploy": "firebase deploy",
     "launch": "npm run build && npm run export && npm run deploy"
   },
