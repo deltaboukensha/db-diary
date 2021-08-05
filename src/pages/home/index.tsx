@@ -2,9 +2,13 @@ import firebase from "firebase/app"
 import "firebase/auth"
 import "firebase/firestore"
 import React, { useEffect, useState } from "react"
-import { Button, Fab, Menu, MenuItem, Switch, TextField } from "@material-ui/core"
+import { Button, Fab, Menu, MenuItem, Switch, TextField, Tooltip } from "@material-ui/core"
 import { createTheme, ThemeProvider } from "@material-ui/core/styles"
-import { Add } from "@material-ui/icons"
+import AddBoxIcon from '@material-ui/icons/AddBox';
+import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
+import RestoreFromTrashIcon from '@material-ui/icons/RestoreFromTrash';
+import dayjs from "dayjs"
 import styles from "./styles.module.css"
 
 const theme = createTheme({
@@ -31,6 +35,28 @@ interface IRecordDiary {
   trash: boolean
 }
 
+const signIn = async () => {
+  const googleAuthProvider = new firebase.auth.GoogleAuthProvider()
+  await firebase.app().auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+  await firebase.app().auth().signInWithRedirect(googleAuthProvider)
+}
+
+const updateRecord = async (record: IRecordDiary) => {
+  const entry : IEntryDiary = {
+    date: record.date,
+    text: record.text,
+    trash: record.trash,
+  }
+  await firebase
+    .app()
+    .firestore()
+    .collection("user")
+    .doc(await firebase.app().auth().currentUser.uid)
+    .collection("diary")
+    .doc(record.id)
+    .set(entry)
+}
+
 export const Home = (): JSX.Element => {
   const [loading, setLoading] = useState<boolean>(false)
   const [displayName, setDisplayName] = useState<string>(null)
@@ -38,12 +64,6 @@ export const Home = (): JSX.Element => {
   const [diaryList, setDiaryList] = useState<IRecordDiary[]>([])
   const [showTrash, setShowTrash] = useState<boolean>(false)
   const [anchorEl, setAnchorEl] = useState(null)
-
-  const signIn = async () => {
-    const googleAuthProvider = new firebase.auth.GoogleAuthProvider()
-    await firebase.app().auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-    await firebase.app().auth().signInWithRedirect(googleAuthProvider)
-  }
 
   const loadData = async () => {
     setLoading(true)
@@ -173,36 +193,47 @@ export const Home = (): JSX.Element => {
             .add(diaryEntry)
         }}
       >
-        <Add />
+        <AddBoxIcon />
       </Fab>
-      {diaryList.map((i) => (
-        <div key={i.id} className={styles["record"]}>
-          <Button>Trash</Button>
-          <Button>Delete</Button>
-          <Button>Undo</Button>
+      {diaryList.map((record) => (
+        <div key={record.id} className={styles["record"]}>
+          <form noValidate>
+            <TextField
+              type="date"
+              defaultValue={dayjs(record.date).format("YYYY-MM-DD")}
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
+          </form>
+          <Tooltip arrow title="Trash">
+            <Button onClick={async () => {
+              await updateRecord({
+                ...record,
+                trash: true,
+              })
+            }}><DeleteIcon/> </Button>
+          </Tooltip>
+          <Tooltip arrow title="Delete">
+            <Button><DeleteForeverIcon/> </Button>
+          </Tooltip>
+          <Tooltip arrow title="Restore">
+            <Button><RestoreFromTrashIcon></RestoreFromTrashIcon> </Button>
+          </Tooltip>
           <TextField
-            label={i.date}
+            label={record.date}
             multiline
             rows={4}
-            defaultValue={i.text}
+            defaultValue={record.text}
             variant="outlined"
             className={styles["record-text"]}
             onBlur={async (e) => {
-              if (e.target.value == i.text) return
+              if (e.target.value == record.text) return
 
-              const entry: IEntryDiary = {
-                text: e.target.value,
-                date: i.date,
-                trash: i.trash,
-              }
-              await firebase
-                .app()
-                .firestore()
-                .collection("user")
-                .doc(await firebase.app().auth().currentUser.uid)
-                .collection("diary")
-                .doc(i.id)
-                .set(entry)
+              await updateRecord({
+                ...record,
+                text: e.target.value
+              })
             }}
           />
         </div>
