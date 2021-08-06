@@ -14,7 +14,6 @@ import styles from "./styles.module.css"
 import { DatePicker, MuiPickersUtilsProvider } from "@material-ui/pickers"
 import CalendarTodayIcon from "@material-ui/icons/CalendarToday"
 import weekOfYear from "dayjs/plugin/weekOfYear"
-import { RecordVoiceOver } from "@material-ui/icons"
 dayjs.extend(weekOfYear)
 
 const theme = createTheme({
@@ -39,6 +38,12 @@ interface IRecordDiary {
   date: string
   text: string
   trash: boolean
+}
+
+interface IUser {
+  uid: string
+  displayName: string
+  email: string
 }
 
 const signIn = async () => {
@@ -67,8 +72,8 @@ export const Home = (): JSX.Element => {
   const [loading, setLoading] = useState<boolean>(false)
   const [displayName, setDisplayName] = useState<string>(null)
   const [userUid, setUserUid] = useState<string>(null)
+  const [user, setUser] = useState<IUser>(null)
   const [diaryList, setDiaryList] = useState<IRecordDiary[]>([])
-  const [showTrash, setShowTrash] = useState<boolean>(false)
   const [show, setShow] = useState<{ [key: string]: boolean }>({})
   const [anchorEl, setAnchorEl] = useState(null)
 
@@ -130,18 +135,6 @@ export const Home = (): JSX.Element => {
       await loadData()
     })
   }, [])
-
-  const ButtonCalender = (record: IRecordDiary) => {
-    return (
-      <Tooltip arrow title="Calendar">
-        <Button disabled={record.trash} onClick={() => {}}>
-          <CalendarTodayIcon />
-        </Button>
-      </Tooltip>
-    )
-  }
-
-  const inputEl = useRef(null)
 
   const innerContent = () => (
     <>
@@ -213,6 +206,23 @@ export const Home = (): JSX.Element => {
           }}
         >
           Sign Out
+        </MenuItem>
+        <MenuItem
+          onClick={async (e) => {
+            setAnchorEl(null)
+
+            const j = JSON.stringify(diaryList, null, 2)
+            const blob = new Blob([j], { type: "application/json" })
+            const href = await URL.createObjectURL(blob)
+            const link = document.createElement("a")
+            link.href = href
+            link.download = "records.json"
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+          }}
+        >
+          Export
         </MenuItem>
       </Menu>
       {diaryList.map((record) => (
