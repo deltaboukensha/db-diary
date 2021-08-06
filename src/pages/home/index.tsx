@@ -146,6 +146,26 @@ export const Home = (): JSX.Element => {
   const innerContent = () => (
     <>
       {loading ? <LinearProgress /> : <LinearProgress variant="determinate" value={100} />}
+      <Fab
+        color="primary"
+        aria-label="add"
+        onClick={async () => {
+          const diaryEntry: IEntryDiary = {
+            date: dayjs().toISOString(),
+            text: "",
+            trash: false,
+          }
+          await firebase
+            .app()
+            .firestore()
+            .collection("user")
+            .doc(await firebase.app().auth().currentUser.uid)
+            .collection("diary")
+            .add(diaryEntry)
+        }}
+      >
+        <AddBoxIcon />
+      </Fab>
       {userUid && (
         <Button
           aria-controls="simple-menu"
@@ -195,108 +215,90 @@ export const Home = (): JSX.Element => {
           Sign Out
         </MenuItem>
       </Menu>
-      <Fab
-        color="primary"
-        aria-label="add"
-        onClick={async () => {
-          const diaryEntry: IEntryDiary = {
-            date: dayjs().toISOString(),
-            text: "",
-            trash: false,
-          }
-          await firebase
-            .app()
-            .firestore()
-            .collection("user")
-            .doc(await firebase.app().auth().currentUser.uid)
-            .collection("diary")
-            .add(diaryEntry)
-        }}
-      >
-        <AddBoxIcon />
-      </Fab>
       {diaryList.map((record) => (
         <div key={record.id} className={styles["record"]}>
-          {!record.trash && (
-            <Tooltip arrow title="Calendar">
-              <Button
-                disabled={record.trash}
-                onClick={() => {
+          <div className={styles["record-controls"]}>
+            {!record.trash && (
+              <Tooltip arrow title="Calendar">
+                <Button
+                  disabled={record.trash}
+                  onClick={() => {
+                    setShow({
+                      ...show,
+                      ["datepicker_" + record.id]: true,
+                    })
+                  }}
+                >
+                  <CalendarTodayIcon />
+                </Button>
+              </Tooltip>
+            )}
+            {show["datepicker_" + record.id] && (
+              <DatePicker
+                value={record.date}
+                hidden={true}
+                open={true}
+                onChange={async (d) => {
+                  await updateRecord({
+                    ...record,
+                    date: d.toISOString(),
+                  })
+                }}
+                onClose={() => {
                   setShow({
                     ...show,
-                    ["datepicker_" + record.id]: true,
+                    ["datepicker_" + record.id]: false,
                   })
                 }}
-              >
-                <CalendarTodayIcon />
-              </Button>
-            </Tooltip>
-          )}
-          {show["datepicker_" + record.id] && (
-            <DatePicker
-              value={record.date}
-              hidden={true}
-              open={true}
-              onChange={async (d) => {
-                await updateRecord({
-                  ...record,
-                  date: d.toISOString(),
-                })
-              }}
-              onClose={() => {
-                setShow({
-                  ...show,
-                  ["datepicker_" + record.id]: false,
-                })
-              }}
-            ></DatePicker>
-          )}
-          {!record.trash && (
-            <Tooltip arrow title="Trash">
-              <Button
-                onClick={async () => {
-                  await updateRecord({
-                    ...record,
-                    trash: true,
-                  })
-                }}
-              >
-                <DeleteIcon />
-              </Button>
-            </Tooltip>
-          )}
-          {record.trash && (
-            <Tooltip arrow title="Delete">
-              <Button
-                onClick={async () => {
-                  await firebase
-                    .app()
-                    .firestore()
-                    .collection("user")
-                    .doc(await firebase.app().auth().currentUser.uid)
-                    .collection("diary")
-                    .doc(record.id)
-                    .delete()
-                }}
-              >
-                <DeleteForeverIcon />
-              </Button>
-            </Tooltip>
-          )}
-          {record.trash && (
-            <Tooltip arrow title="Restore">
-              <Button
-                onClick={async () => {
-                  await updateRecord({
-                    ...record,
-                    trash: false,
-                  })
-                }}
-              >
-                <RestoreFromTrashIcon />
-              </Button>
-            </Tooltip>
-          )}
+              ></DatePicker>
+            )}
+            {!record.trash && (
+              <Tooltip arrow title="Trash">
+                <Button
+                  onClick={async () => {
+                    await updateRecord({
+                      ...record,
+                      trash: true,
+                    })
+                  }}
+                >
+                  <DeleteIcon />
+                </Button>
+              </Tooltip>
+            )}
+            {record.trash && (
+              <Tooltip arrow title="Delete">
+                <Button
+                  onClick={async () => {
+                    await firebase
+                      .app()
+                      .firestore()
+                      .collection("user")
+                      .doc(await firebase.app().auth().currentUser.uid)
+                      .collection("diary")
+                      .doc(record.id)
+                      .delete()
+                  }}
+                >
+                  <DeleteForeverIcon />
+                </Button>
+              </Tooltip>
+            )}
+            {record.trash && (
+              <Tooltip arrow title="Restore">
+                <Button
+                  onClick={async () => {
+                    await updateRecord({
+                      ...record,
+                      trash: false,
+                    })
+                  }}
+                >
+                  <RestoreFromTrashIcon />
+                </Button>
+              </Tooltip>
+            )}
+          </div>
           <TextField
             disabled={record.trash}
             label={dayjs(record.date).format("YYYY-MM-DD MMMM [w.]ww dddd")}
