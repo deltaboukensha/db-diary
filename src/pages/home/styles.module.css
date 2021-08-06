@@ -3,7 +3,5 @@
 }
 .record-text {
   width: 100%;
-}
-.record-date {
-  display: inline-block;
+  margin: 5px 0px 0px 0px;
 }

@@ -69,5 +69,7 @@ npm i @types/react-redux
 ```
 npm i @material-ui/core
 npm i @material-ui/icons
-
+npm i @material-ui/pickers
+npm i @date-io/dayjs@1.x dayjs
+npm i dayjs
 ```

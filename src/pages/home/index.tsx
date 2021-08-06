@@ -1,7 +1,7 @@
 import firebase from "firebase/app"
 import "firebase/auth"
 import "firebase/firestore"
-import React, { useEffect, useState } from "react"
+import React, { createRef, useEffect, useRef, useState } from "react"
 import { Button, Fab, LinearProgress, Menu, MenuItem, Switch, TextField, Tooltip } from "@material-ui/core"
 import { createTheme, ThemeProvider } from "@material-ui/core/styles"
 import AddBoxIcon from "@material-ui/icons/AddBox"
@@ -9,7 +9,13 @@ import DeleteIcon from "@material-ui/icons/Delete"
 import DeleteForeverIcon from "@material-ui/icons/DeleteForever"
 import RestoreFromTrashIcon from "@material-ui/icons/RestoreFromTrash"
 import dayjs from "dayjs"
+import DayjsUtils from "@date-io/dayjs"
 import styles from "./styles.module.css"
+import { DatePicker, MuiPickersUtilsProvider } from "@material-ui/pickers"
+import CalendarTodayIcon from "@material-ui/icons/CalendarToday"
+import weekOfYear from "dayjs/plugin/weekOfYear"
+import { RecordVoiceOver } from "@material-ui/icons"
+dayjs.extend(weekOfYear)
 
 const theme = createTheme({
   palette: {
@@ -63,6 +69,7 @@ export const Home = (): JSX.Element => {
   const [userUid, setUserUid] = useState<string>(null)
   const [diaryList, setDiaryList] = useState<IRecordDiary[]>([])
   const [showTrash, setShowTrash] = useState<boolean>(false)
+  const [show, setShow] = useState<{ [key: string]: boolean }>({})
   const [anchorEl, setAnchorEl] = useState(null)
 
   const loadData = async () => {
@@ -124,8 +131,20 @@ export const Home = (): JSX.Element => {
     })
   }, [])
 
-  return (
-    <ThemeProvider theme={theme}>
+  const ButtonCalender = (record: IRecordDiary) => {
+    return (
+      <Tooltip arrow title="Calendar">
+        <Button disabled={record.trash} onClick={() => {}}>
+          <CalendarTodayIcon />
+        </Button>
+      </Tooltip>
+    )
+  }
+
+  const inputEl = useRef(null)
+
+  const innerContent = () => (
+    <>
       {loading ? <LinearProgress /> : <LinearProgress variant="determinate" value={100} />}
       {userUid && (
         <Button
@@ -198,21 +217,40 @@ export const Home = (): JSX.Element => {
       </Fab>
       {diaryList.map((record) => (
         <div key={record.id} className={styles["record"]}>
-          <form noValidate>
-            <TextField
-              type="date"
-              defaultValue={dayjs(record.date).format("YYYY-MM-DD")}
-              InputLabelProps={{
-                shrink: true,
-              }}
-              onChange={async (e) => {
+          {!record.trash && (
+            <Tooltip arrow title="Calendar">
+              <Button
+                disabled={record.trash}
+                onClick={() => {
+                  setShow({
+                    ...show,
+                    ["datepicker_" + record.id]: true,
+                  })
+                }}
+              >
+                <CalendarTodayIcon />
+              </Button>
+            </Tooltip>
+          )}
+          {show["datepicker_" + record.id] && (
+            <DatePicker
+              value={record.date}
+              hidden={true}
+              open={true}
+              onChange={async (d) => {
                 await updateRecord({
                   ...record,
-                  date: dayjs(e.target.value).toISOString(),
+                  date: d.toISOString(),
                 })
               }}
-            />
-          </form>
+              onClose={() => {
+                setShow({
+                  ...show,
+                  ["datepicker_" + record.id]: false,
+                })
+              }}
+            ></DatePicker>
+          )}
           {!record.trash && (
             <Tooltip arrow title="Trash">
               <Button
@@ -261,7 +299,7 @@ export const Home = (): JSX.Element => {
           )}
           <TextField
             disabled={record.trash}
-            label={dayjs(record.date).format("YYYY-MM-DD")}
+            label={dayjs(record.date).format("YYYY-MM-DD MMMM [w.]ww dddd")}
             multiline
             rows={4}
             defaultValue={record.text}
@@ -278,6 +316,12 @@ export const Home = (): JSX.Element => {
           />
         </div>
       ))}
+    </>
+  )
+
+  return (
+    <ThemeProvider theme={theme}>
+      <MuiPickersUtilsProvider utils={DayjsUtils}>{innerContent()}</MuiPickersUtilsProvider>
     </ThemeProvider>
   )
 }
