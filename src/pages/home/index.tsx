@@ -1,8 +1,8 @@
 import firebase from "firebase/app"
 import "firebase/auth"
 import "firebase/firestore"
-import React, { createRef, useEffect, useRef, useState } from "react"
-import { Button, Fab, LinearProgress, Menu, MenuItem, Switch, TextField, Tooltip } from "@material-ui/core"
+import React, { useEffect, useState } from "react"
+import { Button, Fab, LinearProgress, Menu, MenuItem, TextField, Tooltip } from "@material-ui/core"
 import { createTheme, ThemeProvider } from "@material-ui/core/styles"
 import AddBoxIcon from "@material-ui/icons/AddBox"
 import DeleteIcon from "@material-ui/icons/Delete"
@@ -70,8 +70,6 @@ const updateRecord = async (record: IRecordDiary) => {
 
 export const Home = (): JSX.Element => {
   const [loading, setLoading] = useState<boolean>(false)
-  const [displayName, setDisplayName] = useState<string>(null)
-  const [userUid, setUserUid] = useState<string>(null)
   const [user, setUser] = useState<IUser>(null)
   const [diaryList, setDiaryList] = useState<IRecordDiary[]>([])
   const [show, setShow] = useState<{ [key: string]: boolean }>({})
@@ -101,6 +99,7 @@ export const Home = (): JSX.Element => {
           }
           list.push(record)
         }
+        console.log("list.length", list.length)
         setDiaryList(list)
         setLoading(false)
       })
@@ -121,21 +120,22 @@ export const Home = (): JSX.Element => {
     }
     firebase.initializeApp(firebaseConfig)
 
-    firebase.auth().onAuthStateChanged(async (user) => {
-      setDisplayName(user?.displayName)
-      setUserUid(user?.uid)
-      setLoading(false)
-
-      if (!user) {
+    firebase.auth().onAuthStateChanged(async (u) => {
+      if (!u) {
+        setUser(null)
         setDiaryList([])
         setLoading(false)
         return
       }
 
+      setUser({
+        uid: u.uid,
+        displayName: u.displayName,
+        email: u.email,
+      })
       await loadData()
     })
   }, [])
-
   const innerContent = () => (
     <>
       {loading ? <LinearProgress /> : <LinearProgress variant="determinate" value={100} />}
@@ -159,7 +159,7 @@ export const Home = (): JSX.Element => {
       >
         <AddBoxIcon />
       </Fab>
-      {userUid && (
+      {user && (
         <Button
           aria-controls="simple-menu"
           aria-haspopup="true"
@@ -167,11 +167,11 @@ export const Home = (): JSX.Element => {
             setAnchorEl(e.currentTarget)
           }}
         >
-          {displayName}
+          {user.displayName}
         </Button>
       )}
-      {loading && !userUid && <Button>Loading</Button>}
-      {!loading && !userUid && (
+      {loading && !user && <Button>Loading</Button>}
+      {!loading && !user && (
         <Button
           aria-controls="simple-menu"
           aria-haspopup="true"
@@ -192,7 +192,7 @@ export const Home = (): JSX.Element => {
         }}
       >
         <MenuItem
-          onClick={async (e) => {
+          onClick={async () => {
             setAnchorEl(null)
             await signIn()
           }}
@@ -200,7 +200,7 @@ export const Home = (): JSX.Element => {
           Change User
         </MenuItem>
         <MenuItem
-          onClick={async (e) => {
+          onClick={async () => {
             setAnchorEl(null)
             await firebase.app().auth().signOut()
           }}
@@ -208,7 +208,31 @@ export const Home = (): JSX.Element => {
           Sign Out
         </MenuItem>
         <MenuItem
-          onClick={async (e) => {
+          disabled={true}
+          // onClick={async (e) => {
+          //   setAnchorEl(null)
+
+          //   for(const d of data){
+          //     const diaryEntry: IEntryDiary = {
+          //       date: dayjs(d.date).toISOString(),
+          //       text: d.text,
+          //       trash: false,
+          //     }
+          //     console.log(diaryEntry)
+          //     await firebase
+          //       .app()
+          //       .firestore()
+          //       .collection("user")
+          //       .doc(await firebase.app().auth().currentUser.uid)
+          //       .collection("diary")
+          //       .add(diaryEntry)
+          //   }
+          // }}
+        >
+          Import
+        </MenuItem>
+        <MenuItem
+          onClick={async () => {
             setAnchorEl(null)
 
             const j = JSON.stringify(diaryList, null, 2)
