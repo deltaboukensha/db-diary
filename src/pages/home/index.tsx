@@ -2,9 +2,8 @@ import firebase from "firebase/app"
 import "firebase/auth"
 import "firebase/firestore"
 import React, { useEffect, useState } from "react"
-import { Button, Fab, LinearProgress, Menu, MenuItem, TextField, Tooltip } from "@material-ui/core"
+import { Button, LinearProgress, Menu, MenuItem, TextField, Tooltip } from "@material-ui/core"
 import { createTheme, ThemeProvider } from "@material-ui/core/styles"
-import AddBoxIcon from "@material-ui/icons/AddBox"
 import DeleteIcon from "@material-ui/icons/Delete"
 import DeleteForeverIcon from "@material-ui/icons/DeleteForever"
 import RestoreFromTrashIcon from "@material-ui/icons/RestoreFromTrash"
@@ -46,6 +45,8 @@ interface IUser {
   email: string
 }
 
+let unsubscribe: () => void = null
+
 const signIn = async () => {
   const googleAuthProvider = new firebase.auth.GoogleAuthProvider()
   await firebase.app().auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
@@ -74,11 +75,12 @@ export const Home = (): JSX.Element => {
   const [diaryList, setDiaryList] = useState<IRecordDiary[]>([])
   const [show, setShow] = useState<{ [key: string]: boolean }>({})
   const [anchorEl, setAnchorEl] = useState(null)
+  const [newEntry, setNewEntry] = useState<IEntryDiary>({ text: "", date: dayjs().toISOString(), trash: false })
 
   const loadData = async () => {
     setLoading(true)
 
-    firebase
+    unsubscribe = firebase
       .app()
       .firestore()
       .collection("user")
@@ -139,26 +141,6 @@ export const Home = (): JSX.Element => {
   const innerContent = () => (
     <>
       {loading ? <LinearProgress /> : <LinearProgress variant="determinate" value={100} />}
-      <Fab
-        color="primary"
-        aria-label="add"
-        onClick={async () => {
-          const diaryEntry: IEntryDiary = {
-            date: dayjs().toISOString(),
-            text: "",
-            trash: false,
-          }
-          await firebase
-            .app()
-            .firestore()
-            .collection("user")
-            .doc(await firebase.app().auth().currentUser.uid)
-            .collection("diary")
-            .add(diaryEntry)
-        }}
-      >
-        <AddBoxIcon />
-      </Fab>
       {user && (
         <Button
           aria-controls="simple-menu"
@@ -202,6 +184,7 @@ export const Home = (): JSX.Element => {
         <MenuItem
           onClick={async () => {
             setAnchorEl(null)
+            unsubscribe()
             await firebase.app().auth().signOut()
           }}
         >
@@ -249,6 +232,71 @@ export const Home = (): JSX.Element => {
           Export
         </MenuItem>
       </Menu>
+      {!loading && user && (
+        <div className={styles["record"]}>
+          <div className={styles["record-controls"]}>
+            <Tooltip arrow title="Calendar">
+              <Button
+                onClick={() => {
+                  setShow({
+                    ...show,
+                    ["datepicker_new"]: true,
+                  })
+                }}
+              >
+                <CalendarTodayIcon />
+              </Button>
+            </Tooltip>
+            {show["datepicker_new"] && (
+              <DatePicker
+                style={{ display: "none" }}
+                value={newEntry.date}
+                hidden={true}
+                open={true}
+                onChange={async (d) => {
+                  setNewEntry({
+                    ...newEntry,
+                    date: d.toISOString(),
+                  })
+                }}
+                onClose={() => {
+                  setShow({
+                    ...show,
+                    ["datepicker_new"]: false,
+                  })
+                }}
+              ></DatePicker>
+            )}
+          </div>
+          <TextField
+            label={dayjs(newEntry.date).format("YYYY-MM-DD MMMM [w.]ww dddd")}
+            multiline
+            rows={8}
+            variant="outlined"
+            defaultValue=""
+            className={styles["record-text"]}
+            onBlur={async (e) => {
+              if (!e.target.value) return
+
+              const entry: IEntryDiary = {
+                ...newEntry,
+                text: e.target.value,
+              }
+
+              e.target.value = ""
+              setNewEntry({ text: "", date: dayjs().toISOString(), trash: false })
+
+              await firebase
+                .app()
+                .firestore()
+                .collection("user")
+                .doc(await firebase.app().auth().currentUser.uid)
+                .collection("diary")
+                .add(entry)
+            }}
+          />
+        </div>
+      )}
       {diaryList.map((record) => (
         <div key={record.id} className={styles["record"]}>
           <div className={styles["record-controls"]}>
@@ -269,6 +317,7 @@ export const Home = (): JSX.Element => {
             )}
             {show["datepicker_" + record.id] && (
               <DatePicker
+                style={{ display: "none" }}
                 value={record.date}
                 hidden={true}
                 open={true}
@@ -337,7 +386,7 @@ export const Home = (): JSX.Element => {
             disabled={record.trash}
             label={dayjs(record.date).format("YYYY-MM-DD MMMM [w.]ww dddd")}
             multiline
-            rows={4}
+            rows={8}
             defaultValue={record.text}
             variant="outlined"
             className={styles["record-text"]}
