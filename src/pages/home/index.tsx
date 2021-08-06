@@ -253,6 +253,7 @@ export const Home = (): JSX.Element => {
                 value={newEntry.date}
                 hidden={true}
                 open={true}
+                showTodayButton={true}
                 onChange={async (d) => {
                   setNewEntry({
                     ...newEntry,
@@ -321,6 +322,7 @@ export const Home = (): JSX.Element => {
                 value={record.date}
                 hidden={true}
                 open={true}
+                showTodayButton={true}
                 onChange={async (d) => {
                   await updateRecord({
                     ...record,
