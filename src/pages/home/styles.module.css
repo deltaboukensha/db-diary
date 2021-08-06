@@ -4,3 +4,6 @@
 .record-text {
   width: 100%;
 }
+.record-date {
+  display: inline-block;
+}

@@ -74,7 +74,7 @@ export const Home = (): JSX.Element => {
       .collection("user")
       .doc(await firebase.app().auth().currentUser.uid)
       .collection("diary")
-      .where("trash", "!=", !showTrash)
+      // .where("trash", "!=", !showTrash)
       .orderBy("trash")
       .orderBy("date", "desc")
       .onSnapshot(async (snapshot) => {
@@ -213,29 +213,54 @@ export const Home = (): JSX.Element => {
               }}
             />
           </form>
-          <Tooltip arrow title="Trash">
-            <Button
-              onClick={async () => {
-                await updateRecord({
-                  ...record,
-                  trash: true,
-                })
-              }}
-            >
-              <DeleteIcon />{" "}
-            </Button>
-          </Tooltip>
-          <Tooltip arrow title="Delete">
-            <Button>
-              <DeleteForeverIcon />{" "}
-            </Button>
-          </Tooltip>
-          <Tooltip arrow title="Restore">
-            <Button>
-              <RestoreFromTrashIcon></RestoreFromTrashIcon>{" "}
-            </Button>
-          </Tooltip>
+          {!record.trash && (
+            <Tooltip arrow title="Trash">
+              <Button
+                onClick={async () => {
+                  await updateRecord({
+                    ...record,
+                    trash: true,
+                  })
+                }}
+              >
+                <DeleteIcon />
+              </Button>
+            </Tooltip>
+          )}
+          {record.trash && (
+            <Tooltip arrow title="Delete">
+              <Button
+                onClick={async () => {
+                  await firebase
+                    .app()
+                    .firestore()
+                    .collection("user")
+                    .doc(await firebase.app().auth().currentUser.uid)
+                    .collection("diary")
+                    .doc(record.id)
+                    .delete()
+                }}
+              >
+                <DeleteForeverIcon />
+              </Button>
+            </Tooltip>
+          )}
+          {record.trash && (
+            <Tooltip arrow title="Restore">
+              <Button
+                onClick={async () => {
+                  await updateRecord({
+                    ...record,
+                    trash: false,
+                  })
+                }}
+              >
+                <RestoreFromTrashIcon />
+              </Button>
+            </Tooltip>
+          )}
           <TextField
+            disabled={record.trash}
             label={dayjs(record.date).format("YYYY-MM-DD")}
             multiline
             rows={4}
