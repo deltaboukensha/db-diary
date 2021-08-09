@@ -12,8 +12,12 @@ import DayjsUtils from "@date-io/dayjs"
 import styles from "./styles.module.css"
 import { DatePicker, MuiPickersUtilsProvider } from "@material-ui/pickers"
 import CalendarTodayIcon from "@material-ui/icons/CalendarToday"
-import weekOfYear from "dayjs/plugin/weekOfYear"
-dayjs.extend(weekOfYear)
+
+import pluginWeekOfYear from "dayjs/plugin/weekOfYear"
+import pluginCalendar from "dayjs/plugin/calendar"
+
+dayjs.extend(pluginWeekOfYear)
+dayjs.extend(pluginCalendar)
 
 const theme = createTheme({
   palette: {
@@ -149,7 +153,7 @@ export const Home = (): JSX.Element => {
             setAnchorEl(e.currentTarget)
           }}
         >
-          {user.displayName}
+          {user.displayName} - {user.email}
         </Button>
       )}
       {loading && !user && <Button>Loading</Button>}
@@ -235,18 +239,6 @@ export const Home = (): JSX.Element => {
       {!loading && user && (
         <div className={styles["record"]}>
           <div className={styles["record-controls"]}>
-            <Tooltip arrow title="Calendar">
-              <Button
-                onClick={() => {
-                  setShow({
-                    ...show,
-                    ["datepicker_new"]: true,
-                  })
-                }}
-              >
-                <CalendarTodayIcon />
-              </Button>
-            </Tooltip>
             {show["datepicker_new"] && (
               <DatePicker
                 style={{ display: "none" }}
@@ -270,7 +262,7 @@ export const Home = (): JSX.Element => {
             )}
           </div>
           <TextField
-            label={dayjs(newEntry.date).format("YYYY-MM-DD MMMM [w.]ww dddd")}
+            label={dayjs(newEntry.date).format("YYYY-MM-DD MMMM [w.]ww dddd [(Today)]")}
             multiline
             rows={8}
             variant="outlined"
@@ -386,7 +378,14 @@ export const Home = (): JSX.Element => {
           </div>
           <TextField
             disabled={record.trash}
-            label={dayjs(record.date).format("YYYY-MM-DD MMMM [w.]ww dddd")}
+            label={dayjs(record.date).calendar(null, {
+              sameDay: "YYYY-MM-DD MMMM [w.]ww dddd [(Today)]",
+              nextDay: "YYYY-MM-DD MMMM [w.]ww dddd [(Tomorrow)]",
+              nextWeek: "YYYY-MM-DD MMMM [w.]ww dddd [(Next Week)]",
+              lastDay: "YYYY-MM-DD MMMM [w.]ww dddd [(Yesterday)]",
+              lastWeek: "YYYY-MM-DD MMMM [w.]ww dddd [(Last Week)]",
+              sameElse: "YYYY-MM-DD MMMM [w.]ww dddd",
+            })}
             multiline
             rows={8}
             defaultValue={record.text}
