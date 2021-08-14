@@ -168,7 +168,7 @@ export const Home = (): JSX.Element => {
         <Button
           aria-controls="simple-menu"
           aria-haspopup="true"
-          color="secondary"
+          color="primary"
           onClick={async () => {
             await signIn()
           }}
