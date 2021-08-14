@@ -15,7 +15,6 @@ import CalendarTodayIcon from "@material-ui/icons/CalendarToday"
 
 import pluginWeekOfYear from "dayjs/plugin/weekOfYear"
 import pluginCalendar from "dayjs/plugin/calendar"
-import { light } from "@material-ui/core/styles/createPalette"
 
 dayjs.extend(pluginWeekOfYear)
 dayjs.extend(pluginCalendar)
