@@ -24,6 +24,9 @@ const theme = createTheme({
   palette: {
     type: "dark",
     primary: {
+      main: "#FFFFFF",
+    },
+    secondary: {
       main: "#800080",
     },
   },
@@ -143,12 +146,12 @@ export const Home = (): JSX.Element => {
   }, [])
   const innerContent = () => (
     <>
-      {loading ? <LinearProgress color="primary" /> : <LinearProgress color="primary" variant="determinate" value={100} />}
+      {loading ? <LinearProgress color="secondary" /> : <LinearProgress color="secondary" variant="determinate" value={100} />}
       {user && (
         <Button
           aria-controls="simple-menu"
           aria-haspopup="true"
-          color="primary"
+          color="secondary"
           onClick={(e) => {
             setAnchorEl(e.currentTarget)
           }}
@@ -161,7 +164,7 @@ export const Home = (): JSX.Element => {
         <Button
           aria-controls="simple-menu"
           aria-haspopup="true"
-          color="primary"
+          color="secondary"
           onClick={async () => {
             await signIn()
           }}
@@ -171,7 +174,7 @@ export const Home = (): JSX.Element => {
       )}
       <Menu
         id="simple-menu"
-        color="primary"
+        color="secondary"
         anchorEl={anchorEl}
         keepMounted
         open={Boolean(anchorEl)}
@@ -180,7 +183,7 @@ export const Home = (): JSX.Element => {
         }}
       >
         <MenuItem
-          color="primary"
+          color="secondary"
           onClick={async () => {
             setAnchorEl(null)
             await signIn()
@@ -189,7 +192,7 @@ export const Home = (): JSX.Element => {
           Change User
         </MenuItem>
         <MenuItem
-          color="primary"
+          color="secondary"
           onClick={async () => {
             setAnchorEl(null)
             unsubscribe()
@@ -199,7 +202,7 @@ export const Home = (): JSX.Element => {
           Sign Out
         </MenuItem>
         <MenuItem
-          color="primary"
+          color="secondary"
           disabled={true}
           // onClick={async (e) => {
           //   setAnchorEl(null)
@@ -224,7 +227,7 @@ export const Home = (): JSX.Element => {
           Import
         </MenuItem>
         <MenuItem
-          color="primary"
+          color="secondary"
           onClick={async () => {
             setAnchorEl(null)
 
@@ -247,7 +250,7 @@ export const Home = (): JSX.Element => {
           <div className={styles["record-controls"]}>
             {show["datepicker_new"] && (
               <DatePicker
-                color="primary"
+                color="secondary"
                 style={{ display: "none" }}
                 value={newEntry.date}
                 hidden={true}
@@ -304,7 +307,7 @@ export const Home = (): JSX.Element => {
             {!record.trash && (
               <Tooltip arrow title="Calendar">
                 <Button
-                  color="primary"
+                  color="secondary"
                   disabled={record.trash}
                   onClick={() => {
                     setShow({
@@ -319,7 +322,7 @@ export const Home = (): JSX.Element => {
             )}
             {show["datepicker_" + record.id] && (
               <DatePicker
-                color="primary"
+                color="secondary"
                 style={{ display: "none" }}
                 value={record.date}
                 hidden={true}
@@ -342,7 +345,7 @@ export const Home = (): JSX.Element => {
             {!record.trash && (
               <Tooltip arrow title="Trash">
                 <Button
-                  color="primary"
+                  color="secondary"
                   onClick={async () => {
                     await updateRecord({
                       ...record,
@@ -357,7 +360,7 @@ export const Home = (): JSX.Element => {
             {record.trash && (
               <Tooltip arrow title="Delete">
                 <Button
-                  color="primary"
+                  color="secondary"
                   onClick={async () => {
                     await firebase
                       .app()
@@ -376,7 +379,7 @@ export const Home = (): JSX.Element => {
             {record.trash && (
               <Tooltip arrow title="Restore">
                 <Button
-                  color="primary"
+                  color="secondary"
                   onClick={async () => {
                     await updateRecord({
                       ...record,
