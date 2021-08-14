@@ -2,7 +2,7 @@ import firebase from "firebase/app"
 import "firebase/auth"
 import "firebase/firestore"
 import React, { useEffect, useState } from "react"
-import { Button, LinearProgress, Menu, MenuItem, TextField, Tooltip } from "@material-ui/core"
+import { Button, CssBaseline, LinearProgress, Menu, MenuItem, TextField, Tooltip } from "@material-ui/core"
 import { createTheme, ThemeProvider } from "@material-ui/core/styles"
 import DeleteIcon from "@material-ui/icons/Delete"
 import DeleteForeverIcon from "@material-ui/icons/DeleteForever"
@@ -15,17 +15,16 @@ import CalendarTodayIcon from "@material-ui/icons/CalendarToday"
 
 import pluginWeekOfYear from "dayjs/plugin/weekOfYear"
 import pluginCalendar from "dayjs/plugin/calendar"
+import { light } from "@material-ui/core/styles/createPalette"
 
 dayjs.extend(pluginWeekOfYear)
 dayjs.extend(pluginCalendar)
 
 const theme = createTheme({
   palette: {
+    type: "dark",
     primary: {
-      main: "#9370DB",
-    },
-    secondary: {
-      main: "#11cb5f",
+      main: "#800080",
     },
   },
 })
@@ -144,16 +143,17 @@ export const Home = (): JSX.Element => {
   }, [])
   const innerContent = () => (
     <>
-      {loading ? <LinearProgress /> : <LinearProgress variant="determinate" value={100} />}
+      {loading ? <LinearProgress color="primary" /> : <LinearProgress color="primary" variant="determinate" value={100} />}
       {user && (
         <Button
           aria-controls="simple-menu"
           aria-haspopup="true"
+          color="primary"
           onClick={(e) => {
             setAnchorEl(e.currentTarget)
           }}
         >
-          {user.displayName} - {user.email}
+          {`${user.email}`}
         </Button>
       )}
       {loading && !user && <Button>Loading</Button>}
@@ -161,6 +161,7 @@ export const Home = (): JSX.Element => {
         <Button
           aria-controls="simple-menu"
           aria-haspopup="true"
+          color="primary"
           onClick={async () => {
             await signIn()
           }}
@@ -170,6 +171,7 @@ export const Home = (): JSX.Element => {
       )}
       <Menu
         id="simple-menu"
+        color="primary"
         anchorEl={anchorEl}
         keepMounted
         open={Boolean(anchorEl)}
@@ -178,6 +180,7 @@ export const Home = (): JSX.Element => {
         }}
       >
         <MenuItem
+          color="primary"
           onClick={async () => {
             setAnchorEl(null)
             await signIn()
@@ -186,6 +189,7 @@ export const Home = (): JSX.Element => {
           Change User
         </MenuItem>
         <MenuItem
+          color="primary"
           onClick={async () => {
             setAnchorEl(null)
             unsubscribe()
@@ -195,6 +199,7 @@ export const Home = (): JSX.Element => {
           Sign Out
         </MenuItem>
         <MenuItem
+          color="primary"
           disabled={true}
           // onClick={async (e) => {
           //   setAnchorEl(null)
@@ -219,6 +224,7 @@ export const Home = (): JSX.Element => {
           Import
         </MenuItem>
         <MenuItem
+          color="primary"
           onClick={async () => {
             setAnchorEl(null)
 
@@ -241,6 +247,7 @@ export const Home = (): JSX.Element => {
           <div className={styles["record-controls"]}>
             {show["datepicker_new"] && (
               <DatePicker
+                color="primary"
                 style={{ display: "none" }}
                 value={newEntry.date}
                 hidden={true}
@@ -265,6 +272,7 @@ export const Home = (): JSX.Element => {
             label={dayjs(newEntry.date).format("YYYY-MM-DD MMMM [w.]ww dddd [(Today)]")}
             multiline
             rows={8}
+            color="primary"
             variant="outlined"
             defaultValue=""
             className={styles["record-text"]}
@@ -296,6 +304,7 @@ export const Home = (): JSX.Element => {
             {!record.trash && (
               <Tooltip arrow title="Calendar">
                 <Button
+                  color="primary"
                   disabled={record.trash}
                   onClick={() => {
                     setShow({
@@ -310,6 +319,7 @@ export const Home = (): JSX.Element => {
             )}
             {show["datepicker_" + record.id] && (
               <DatePicker
+                color="primary"
                 style={{ display: "none" }}
                 value={record.date}
                 hidden={true}
@@ -332,6 +342,7 @@ export const Home = (): JSX.Element => {
             {!record.trash && (
               <Tooltip arrow title="Trash">
                 <Button
+                  color="primary"
                   onClick={async () => {
                     await updateRecord({
                       ...record,
@@ -346,6 +357,7 @@ export const Home = (): JSX.Element => {
             {record.trash && (
               <Tooltip arrow title="Delete">
                 <Button
+                  color="primary"
                   onClick={async () => {
                     await firebase
                       .app()
@@ -364,6 +376,7 @@ export const Home = (): JSX.Element => {
             {record.trash && (
               <Tooltip arrow title="Restore">
                 <Button
+                  color="primary"
                   onClick={async () => {
                     await updateRecord({
                       ...record,
@@ -377,6 +390,7 @@ export const Home = (): JSX.Element => {
             )}
           </div>
           <TextField
+            color="primary"
             disabled={record.trash}
             label={dayjs(record.date).calendar(null, {
               sameDay: "YYYY-MM-DD MMMM [w.]ww dddd [(Today)]",
@@ -407,6 +421,7 @@ export const Home = (): JSX.Element => {
 
   return (
     <ThemeProvider theme={theme}>
+      <CssBaseline></CssBaseline>
       <MuiPickersUtilsProvider utils={DayjsUtils}>{innerContent()}</MuiPickersUtilsProvider>
     </ThemeProvider>
   )
