@@ -13,6 +13,9 @@ import DayjsUtils from "@date-io/dayjs"
 import styles from "./styles.module.css"
 import { DatePicker, MuiPickersUtilsProvider } from "@material-ui/pickers"
 import CalendarTodayIcon from "@material-ui/icons/CalendarToday"
+import ShareIcon from "@material-ui/icons/Share"
+import AccountCircleIcon from "@material-ui/icons/AccountCircle"
+import ImportExportIcon from "@material-ui/icons/ImportExport"
 
 import pluginWeekOfYear from "dayjs/plugin/weekOfYear"
 import pluginCalendar from "dayjs/plugin/calendar"
@@ -156,7 +159,8 @@ export const Home = (): JSX.Element => {
             setAnchorEl(e.currentTarget)
           }}
         >
-          {`${user.email}`}
+          <AccountCircleIcon />
+          &nbsp;{`${user.email}`}
         </Button>
       )}
       {loading && !user && <Button>Loading</Button>}
@@ -169,7 +173,8 @@ export const Home = (): JSX.Element => {
             await signIn()
           }}
         >
-          Sign In
+          <AccountCircleIcon />
+          &nbsp;Sign In
         </Button>
       )}
       <Menu
@@ -182,6 +187,20 @@ export const Home = (): JSX.Element => {
           setAnchorEl(null)
         }}
       >
+        {
+          <MenuItem
+            color="secondary"
+            onClick={async () => {
+              if (!window?.navigator?.share) return
+              window.navigator.share({
+                url: location.href,
+              })
+            }}
+          >
+            <ShareIcon />
+            &nbsp;Share
+          </MenuItem>
+        }
         <MenuItem
           color="secondary"
           onClick={async () => {
@@ -189,7 +208,8 @@ export const Home = (): JSX.Element => {
             await signIn()
           }}
         >
-          Change User
+          <AccountCircleIcon />
+          &nbsp;Change User
         </MenuItem>
         <MenuItem
           color="secondary"
@@ -199,7 +219,8 @@ export const Home = (): JSX.Element => {
             await firebase.app().auth().signOut()
           }}
         >
-          Sign Out
+          <AccountCircleIcon />
+          &nbsp;Sign Out
         </MenuItem>
         <MenuItem
           color="secondary"
@@ -224,7 +245,8 @@ export const Home = (): JSX.Element => {
           //   }
           // }}
         >
-          Import
+          <ImportExportIcon />
+          &nbsp;Import
         </MenuItem>
         <MenuItem
           color="secondary"
@@ -242,7 +264,8 @@ export const Home = (): JSX.Element => {
             document.body.removeChild(link)
           }}
         >
-          Export
+          <ImportExportIcon />
+          &nbsp;Export
         </MenuItem>
       </Menu>
       {!loading && user && (
@@ -426,7 +449,7 @@ export const Home = (): JSX.Element => {
     <ThemeProvider theme={theme}>
       <Helmet>
         <title>db-diary</title>
-        <meta name="viewport" content="minimal-ui, width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+        <meta name="mobile-web-app-capable" content="yes" />
       </Helmet>
       <CssBaseline></CssBaseline>
       <MuiPickersUtilsProvider utils={DayjsUtils}>{innerContent()}</MuiPickersUtilsProvider>
