@@ -7,6 +7,7 @@ import { createTheme, ThemeProvider } from "@material-ui/core/styles"
 import DeleteIcon from "@material-ui/icons/Delete"
 import DeleteForeverIcon from "@material-ui/icons/DeleteForever"
 import RestoreFromTrashIcon from "@material-ui/icons/RestoreFromTrash"
+import { Helmet } from "react-helmet"
 import dayjs from "dayjs"
 import DayjsUtils from "@date-io/dayjs"
 import styles from "./styles.module.css"
@@ -423,6 +424,10 @@ export const Home = (): JSX.Element => {
 
   return (
     <ThemeProvider theme={theme}>
+      <Helmet>
+        <title>db-diary</title>
+        <meta name="viewport" content="minimal-ui, width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+      </Helmet>
       <CssBaseline></CssBaseline>
       <MuiPickersUtilsProvider utils={DayjsUtils}>{innerContent()}</MuiPickersUtilsProvider>
     </ThemeProvider>
