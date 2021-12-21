@@ -11,7 +11,7 @@
     "dev": "next dev",
     "start": "next start",
     "export": "next export -o .public",
-    "deploy": "firebase deploy",
+    "deploy": "firebase deploy --project db-diary-ee778",
     "publish": "npm run build && npm run export && npm run deploy"
   },
   "repository": {

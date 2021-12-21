@@ -84,7 +84,6 @@ export const Home = (): JSX.Element => {
   const [diaryList, setDiaryList] = useState<IRecordDiary[]>([])
   const [show, setShow] = useState<{ [key: string]: boolean }>({})
   const [anchorEl, setAnchorEl] = useState(null)
-  const [newEntry, setNewEntry] = useState<IEntryDiary>({ text: "", date: dayjs().toISOString(), trash: false })
 
   const loadData = async () => {
     setLoading(true)
@@ -269,49 +268,15 @@ export const Home = (): JSX.Element => {
         </MenuItem>
       </Menu>
       {!loading && user && (
-        <div className={styles["record"]}>
-          <div className={styles["record-controls"]}>
-            {show["datepicker_new"] && (
-              <DatePicker
-                color="secondary"
-                style={{ display: "none" }}
-                value={newEntry.date}
-                hidden={true}
-                open={true}
-                showTodayButton={true}
-                onChange={async (d) => {
-                  setNewEntry({
-                    ...newEntry,
-                    date: d.toISOString(),
-                  })
-                }}
-                onClose={() => {
-                  setShow({
-                    ...show,
-                    ["datepicker_new"]: false,
-                  })
-                }}
-              ></DatePicker>
-            )}
-          </div>
-          <TextField
-            label={dayjs(newEntry.date).format("YYYY-MM-DD MMMM [w.]ww dddd [(Today)]")}
-            multiline
-            rows={8}
+        <div className={styles["new-entry"]}>
+          <Button
             color="primary"
-            variant="outlined"
-            defaultValue=""
-            className={styles["record-text"]}
-            onBlur={async (e) => {
-              if (!e.target.value) return
-
-              const entry: IEntryDiary = {
-                ...newEntry,
-                text: e.target.value,
+            onClick={async () => {
+              const newEntry: IEntryDiary = {
+                date: dayjs().toISOString(),
+                text: "",
+                trash: false,
               }
-
-              e.target.value = ""
-              setNewEntry({ text: "", date: dayjs().toISOString(), trash: false })
 
               await firebase
                 .app()
@@ -319,9 +284,11 @@ export const Home = (): JSX.Element => {
                 .collection("user")
                 .doc(await firebase.app().auth().currentUser.uid)
                 .collection("diary")
-                .add(entry)
+                .add(newEntry)
             }}
-          />
+          >
+            New entry
+          </Button>
         </div>
       )}
       {diaryList.map((record) => (

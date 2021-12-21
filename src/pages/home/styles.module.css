@@ -8,3 +8,10 @@
 .record-controls {
   margin: 5px;
 }
+.new-entry {
+  text-align: center;
+}
+.new-entry button {
+  background-color: purple;
+  width: 100%;
+}
