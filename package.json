@@ -13,7 +13,8 @@
     "export": "next export -o .public",
     "deploy": "firebase deploy --project db-diary-ee778",
     "publish": "npm run build && npm run export && npm run deploy",
-    "port-check": "lsof -i :3000"
+    "port-check": "lsof -i :3000",
+    "login": "firebase login"
   },
   "repository": {
     "type": "git",
