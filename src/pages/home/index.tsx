@@ -88,6 +88,19 @@ const updateRecord = async (record: IRecordDiary) => {
     .set(entry)
 }
 
+const isInView = (element: Element) => {
+  const { top, bottom } = element.getBoundingClientRect()
+  const vHeight = window.innerHeight || document.documentElement.clientHeight
+  return (top > 0 || bottom > 0) && top < vHeight
+}
+
+const scrollToRecord = async (record: IRecordDiary) => {
+  const element = document.querySelector(`#${record.id}`)
+  if (isInView(element)) return
+
+  element.scrollIntoView({ behavior: "smooth", block: "start" })
+}
+
 export const Home = (): JSX.Element => {
   const [loading, setLoading] = useState<boolean>(false)
   const [user, setUser] = useState<IUser>(null)
@@ -293,7 +306,7 @@ export const Home = (): JSX.Element => {
       {diaryList
         .filter((record) => (showTrash && record.trash) || (!showTrash && !record.trash))
         .map((record) => (
-          <div key={record.id} className={styles["record"]}>
+          <div key={record.id} id={record.id} className={styles["record"]}>
             <div className={styles["record-controls"]}>
               {!record.trash && (
                 <Tooltip arrow title="Calendar">
@@ -324,6 +337,7 @@ export const Home = (): JSX.Element => {
                       ...record,
                       date: d.toISOString(),
                     })
+                    await scrollToRecord(record)
                   }}
                   onClose={() => {
                     setShow({
