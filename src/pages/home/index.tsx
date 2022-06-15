@@ -26,7 +26,6 @@ import CalendarTodayIcon from "@material-ui/icons/CalendarToday"
 import ShareIcon from "@material-ui/icons/Share"
 import AccountCircleIcon from "@material-ui/icons/AccountCircle"
 import ImportExportIcon from "@material-ui/icons/ImportExport"
-
 import pluginWeekOfYear from "dayjs/plugin/weekOfYear"
 import pluginCalendar from "dayjs/plugin/calendar"
 
@@ -108,6 +107,7 @@ export const Home = (): JSX.Element => {
   const [show, setShow] = useState<{ [key: string]: boolean }>({})
   const [anchorEl, setAnchorEl] = useState(null)
   const [showTrash, setShowTrash] = useState<boolean>(false)
+  const [demoMode, setDemoMode] = useState<boolean>(false)
 
   const loadData = async () => {
     setLoading(true)
@@ -278,6 +278,18 @@ export const Home = (): JSX.Element => {
             label="View Trash"
           />
         </MenuItem>
+        <MenuItem color="secondary">
+          <FormControlLabel
+            control={
+              <Switch
+                onChange={(e) => {
+                  setDemoMode(e.target.checked)
+                }}
+              />
+            }
+            label="Demo Mode"
+          />
+        </MenuItem>
       </Menu>
       {!loading && user && (
         <div className={styles["new-entry"]}>
@@ -412,7 +424,7 @@ export const Home = (): JSX.Element => {
               rows={8}
               defaultValue={record.text}
               variant="outlined"
-              className={styles["record-text"]}
+              className={demoMode ? `${styles["record-text"]} ${styles["blurred"]}` : styles["record-text"]}
               onBlur={async (e) => {
                 if (e.target.value == record.text) return
 
