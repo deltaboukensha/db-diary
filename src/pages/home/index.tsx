@@ -12,6 +12,7 @@ import {
   Switch,
   TextField,
   Tooltip,
+  debounce,
 } from "@material-ui/core"
 import { createTheme, ThemeProvider } from "@material-ui/core/styles"
 import DeleteIcon from "@material-ui/icons/Delete"
@@ -86,6 +87,8 @@ const updateRecord = async (record: IRecordDiary) => {
     .doc(record.id)
     .set(entry)
 }
+
+const debouncedUpdateRecord = debounce(updateRecord, 1000);
 
 const isInView = (element: Element) => {
   const { top, bottom } = element.getBoundingClientRect()
@@ -425,13 +428,13 @@ export const Home = (): JSX.Element => {
               defaultValue={record.text}
               variant="outlined"
               className={demoMode ? `${styles["record-text"]} ${styles["blurred"]}` : styles["record-text"]}
-              onBlur={async (e) => {
+              onChange={async (e) => {
                 if (e.target.value == record.text) return
 
-                await updateRecord({
+                debouncedUpdateRecord({
                   ...record,
                   text: e.target.value,
-                })
+                });
               }}
             />
           </div>
