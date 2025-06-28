@@ -14,6 +14,7 @@ import {
   Tooltip,
   debounce,
 } from "@material-ui/core"
+import { SnackbarProvider, enqueueSnackbar } from "notistack";
 import { createTheme, ThemeProvider } from "@material-ui/core/styles"
 import DeleteIcon from "@material-ui/icons/Delete"
 import DeleteForeverIcon from "@material-ui/icons/DeleteForever"
@@ -26,6 +27,7 @@ import { DatePicker, MuiPickersUtilsProvider } from "@material-ui/pickers"
 import CalendarTodayIcon from "@material-ui/icons/CalendarToday"
 import ShareIcon from "@material-ui/icons/Share"
 import AccountCircleIcon from "@material-ui/icons/AccountCircle"
+import CheckIcon from "@material-ui/icons/Check"
 import ImportExportIcon from "@material-ui/icons/ImportExport"
 import pluginWeekOfYear from "dayjs/plugin/weekOfYear"
 import pluginCalendar from "dayjs/plugin/calendar"
@@ -88,7 +90,10 @@ const updateRecord = async (record: IRecordDiary) => {
     .set(entry)
 }
 
-const debouncedUpdateRecord = debounce(updateRecord, 1000);
+const debouncedUpdateRecord = debounce(async (record: IRecordDiary) => {
+  await updateRecord(record);
+  await enqueueSnackbar('Saved', { variant: 'success' });
+}, 1000);
 
 const isInView = (element: Element) => {
   const { top, bottom } = element.getBoundingClientRect()
@@ -430,14 +435,16 @@ export const Home = (): JSX.Element => {
               variant="outlined"
               className={demoMode ? `${styles["record-text"]} ${styles["blurred"]}` : styles["record-text"]}
               onChange={async (e) => {
+                console.log("onChange");
                 if (e.target.value == record.text) return
-
+                
                 await debouncedUpdateRecord({
                   ...record,
                   text: e.target.value,
                 });
               }}
               onBlur={async (e) => {
+                console.log("onBlur");
                 if (e.target.value == record.text) return
                 
                 await debouncedUpdateRecord({
@@ -451,15 +458,23 @@ export const Home = (): JSX.Element => {
     </>
   )
 
-  return (
+  useEffect(() => {
+    enqueueSnackbar("Version 1.0.0", { variant: 'success'});
+  }, [])
+
+  return (<>
+    <SnackbarProvider maxSnack={3} anchorOrigin={{ vertical: 'top', horizontal: 'right' }} />
     <ThemeProvider theme={theme}>
       <Helmet>
         <title>db-diary</title>
         <meta name="mobile-web-app-capable" content="yes" />
       </Helmet>
+      <MuiPickersUtilsProvider utils={DayjsUtils}>
+        {innerContent()}
+      </MuiPickersUtilsProvider>
       <CssBaseline></CssBaseline>
-      <MuiPickersUtilsProvider utils={DayjsUtils}>{innerContent()}</MuiPickersUtilsProvider>
     </ThemeProvider>
+  </>
   )
 }
 export default Home
