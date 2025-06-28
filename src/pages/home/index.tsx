@@ -68,7 +68,7 @@ let unsubscribe: () => void = null
 
 const signIn = async () => {
   const googleAuthProvider = new firebase.auth.GoogleAuthProvider()
-  await firebase.app().auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+  // await firebase.app().auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
   await firebase.app().auth().signInWithRedirect(googleAuthProvider)
 }
 
@@ -146,7 +146,8 @@ export const Home = (): JSX.Element => {
     setLoading(true)
     const firebaseConfig = {
       apiKey: "AIzaSyAAa6TM3BHE45ze-hfPPbC5ZbnIswk6ah8",
-      authDomain: "db-diary-ee778.firebaseapp.com",
+      // authDomain: "db-diary-ee778.firebaseapp.com",
+      authDomain: "db-diary-ee778.web.app",
       databaseURL: "https://db-diary-ee778-default-rtdb.europe-west1.firebasedatabase.app",
       projectId: "db-diary-ee778",
       storageBucket: "db-diary-ee778.appspot.com",
