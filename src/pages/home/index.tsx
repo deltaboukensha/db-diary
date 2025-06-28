@@ -432,7 +432,15 @@ export const Home = (): JSX.Element => {
               onChange={async (e) => {
                 if (e.target.value == record.text) return
 
-                debouncedUpdateRecord({
+                await debouncedUpdateRecord({
+                  ...record,
+                  text: e.target.value,
+                });
+              }}
+              onBlur={async (e) => {
+                if (e.target.value == record.text) return
+                
+                await debouncedUpdateRecord({
                   ...record,
                   text: e.target.value,
                 });
