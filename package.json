@@ -37,14 +37,14 @@
     "dayjs": "^1.10.6",
     "debounce": "^2.1.0",
     "firebase": "^8.10.1",
-    "next": "^11.0.1",
+    "next": "^12.3.7",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-helmet": "^6.1.0"
   },
   "devDependencies": {
     "@types/node": "^16.18.126",
-    "@types/react": "^17.0.15",
+    "@types/react": "^17.0.87",
     "@types/react-helmet": "^6.1.2",
     "@typescript-eslint/eslint-plugin": "^4.28.5",
     "@typescript-eslint/parser": "^4.28.5",
