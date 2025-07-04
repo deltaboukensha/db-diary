@@ -14,7 +14,6 @@ import {
   Tooltip,
   debounce,
 } from "@material-ui/core"
-import { SnackbarProvider, enqueueSnackbar } from "notistack";
 import { createTheme, ThemeProvider } from "@material-ui/core/styles"
 import DeleteIcon from "@material-ui/icons/Delete"
 import DeleteForeverIcon from "@material-ui/icons/DeleteForever"
@@ -92,7 +91,6 @@ const updateRecord = async (record: IRecordDiary) => {
 
 const debouncedUpdateRecord = debounce(async (record: IRecordDiary) => {
   await updateRecord(record);
-  await enqueueSnackbar('Saved', { variant: 'success' });
 }, 1000);
 
 const isInView = (element: Element) => {
@@ -458,12 +456,7 @@ export const Home = (): JSX.Element => {
     </>
   )
 
-  useEffect(() => {
-    enqueueSnackbar("Version 1.0.0", { variant: 'success'});
-  }, [])
-
   return (<>
-    <SnackbarProvider maxSnack={3} anchorOrigin={{ vertical: 'top', horizontal: 'right' }} />
     <ThemeProvider theme={theme}>
       <Helmet>
         <title>db-diary</title>
