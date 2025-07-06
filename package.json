@@ -14,7 +14,7 @@
     "deploy": "firebase deploy --project db-diary-ee778",
     "publish": "npm run build && npm run export && npm run deploy",
     "port-check": "lsof -i :3000",
-    "login": "firebase login"
+    "login": "firebase login --reauth"
   },
   "repository": {
     "type": "git",
@@ -51,7 +51,7 @@
     "@typescript-eslint/parser": "^4.28.5",
     "eslint": "^7.31.0",
     "eslint-config-next": "^11.0.1",
-    "firebase-tools": "^9.16.0",
+    "firebase-tools": "^14.9.0",
     "jest": "^27.0.6",
     "prettier": "^2.3.2",
     "ts-jest": "^27.0.4",
